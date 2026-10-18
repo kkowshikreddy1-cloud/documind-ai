@@ -4,13 +4,14 @@ import uuid
 import shutil
 from pathlib import Path
 from typing import List, Optional
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks
+from fastapi import FastAPI, APIRouter, Depends, UploadFile, File, Form, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from backend.config import settings, UPLOAD_DIR, PROCESSED_DIR, DEMO_DATA_DIR
 from backend.db import get_connection, init_db
+from backend.auth import router as auth_router, require_user
 from backend.processor import DocumentProcessor
 from backend.rag import DocumentRetriever
 from backend.reasoning import MultimodalReasoner
@@ -34,7 +35,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Every data route below is registered on this router, which requires a signed-in user.
+# Sign-in and sign-up live in backend/auth.py; /api/health is public.
+protected = APIRouter(dependencies=[Depends(require_user)])
+
+
+@app.get("/api/health")
+def health():
+    return {
+        "status": "ok",
+        "app": settings.app_name,
+        "version": settings.app_version,
+        "demo_login": settings.allow_demo_login,
+    }
+
 # Static files for processed pages, thumbnails, and visual crops
+# (loaded by <img> tags, which cannot send an Authorization header, so these stay open;
+# file names are random UUIDs)
 app.mount("/processed", StaticFiles(directory=str(PROCESSED_DIR)), name="processed")
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
@@ -54,7 +71,7 @@ class ScenarioRequest(BaseModel):
 
 # ----------------- DOCUMENT ENDPOINTS -----------------
 
-@app.get("/api/stats")
+@protected.get("/api/stats")
 def get_stats():
     conn = get_connection()
     c = conn.cursor()
@@ -74,7 +91,7 @@ def get_stats():
         "visuals_analyzed": visuals_count
     }
 
-@app.get("/api/documents")
+@protected.get("/api/documents")
 def list_documents():
     conn = get_connection()
     c = conn.cursor()
@@ -83,7 +100,7 @@ def list_documents():
     conn.close()
     return docs
 
-@app.get("/api/documents/{doc_id}")
+@protected.get("/api/documents/{doc_id}")
 def get_document(doc_id: str):
     conn = get_connection()
     c = conn.cursor()
@@ -100,7 +117,7 @@ def get_document(doc_id: str):
     conn.close()
     return doc_dict
 
-@app.get("/api/documents/{doc_id}/pages/{page_num}/elements")
+@protected.get("/api/documents/{doc_id}/pages/{page_num}/elements")
 def get_page_elements(doc_id: str, page_num: int):
     conn = get_connection()
     c = conn.cursor()
@@ -113,7 +130,7 @@ def get_page_elements(doc_id: str, page_num: int):
     conn.close()
     return elems
 
-@app.post("/api/documents/upload")
+@protected.post("/api/documents/upload")
 async def upload_document(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
@@ -150,7 +167,7 @@ async def upload_document(background_tasks: BackgroundTasks, file: UploadFile = 
         "message": "Document uploaded and queued for multimodal intelligence extraction"
     }
 
-@app.post("/api/demo/load")
+@protected.post("/api/demo/load")
 def load_demo_dataset():
     """Generates the realistic 6-page report and indexes it immediately."""
     demo_pdf = DEMO_DATA_DIR / "Global_Operations_Report_2025.pdf"
@@ -183,7 +200,7 @@ def load_demo_dataset():
 
 # ----------------- AI ANALYST & REASONING -----------------
 
-@app.post("/api/query")
+@protected.post("/api/query")
 def process_query(payload: QueryRequest):
     question = payload.question.strip()
     if not question:
@@ -215,7 +232,7 @@ def process_query(payload: QueryRequest):
     reasoning_result["id"] = query_id
     return reasoning_result
 
-@app.get("/api/history")
+@protected.get("/api/history")
 def get_history():
     conn = get_connection()
     c = conn.cursor()
@@ -231,7 +248,7 @@ def get_history():
 
 # ----------------- INSIGHTS, RECOMMENDATIONS & ACTION PLANS -----------------
 
-@app.get("/api/insights")
+@protected.get("/api/insights")
 def get_insights():
     conn = get_connection()
     c = conn.cursor()
@@ -240,7 +257,7 @@ def get_insights():
     conn.close()
     return insights
 
-@app.get("/api/recommendations")
+@protected.get("/api/recommendations")
 def get_recommendations():
     conn = get_connection()
     c = conn.cursor()
@@ -249,7 +266,7 @@ def get_recommendations():
     conn.close()
     return recs
 
-@app.get("/api/action-plans")
+@protected.get("/api/action-plans")
 def get_action_plans():
     conn = get_connection()
     c = conn.cursor()
@@ -258,7 +275,7 @@ def get_action_plans():
     conn.close()
     return plans
 
-@app.post("/api/action-plans/{plan_id}/status")
+@protected.post("/api/action-plans/{plan_id}/status")
 def update_action_plan_status(plan_id: str, payload: StatusUpdateRequest):
     conn = get_connection()
     c = conn.cursor()
@@ -269,7 +286,7 @@ def update_action_plan_status(plan_id: str, payload: StatusUpdateRequest):
 
 # ----------------- SCENARIO LAB (WHAT-IF SIMULATION) -----------------
 
-@app.post("/api/scenario")
+@protected.post("/api/scenario")
 def calculate_scenario(payload: ScenarioRequest):
     baseline = payload.baseline_downtime_hours
     pct = payload.reduction_percentage / 100.0
@@ -296,6 +313,9 @@ def calculate_scenario(payload: ScenarioRequest):
         "estimated_cost_savings_annual": round(cost_savings_yr, 2),
         "disclaimer": "Scenario estimate — not a guaranteed prediction. Based on 18.0 hr/mo baseline and 75 units/hr standard cadence."
     }
+
+app.include_router(auth_router)
+app.include_router(protected)
 
 if __name__ == "__main__":
     import uvicorn

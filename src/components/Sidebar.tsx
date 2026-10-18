@@ -9,8 +9,11 @@ import {
   Settings, 
   FlaskConical,
   ShieldCheck,
-  Cpu
+  Cpu,
+  LogOut
 } from 'lucide-react';
+import { LogoMark } from './Logo';
+import { useAuth } from '../auth/AuthContext';
 
 interface SidebarProps {
   currentTab: string;
@@ -19,6 +22,14 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab, documentCount }) => {
+  const { user, logout } = useAuth();
+  const initials = (user?.name ?? '?')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0].toUpperCase())
+    .join('');
+
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'documents', label: 'Documents', icon: Files, badge: documentCount > 0 ? documentCount : undefined },
@@ -35,9 +46,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab, doc
       <div>
         {/* Brand Header */}
         <div className="p-6 border-b border-slate-800/80 flex items-center space-x-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white font-black text-lg">
-            D
-          </div>
+          <LogoMark className="w-9 h-9 shrink-0 [filter:drop-shadow(0_6px_10px_rgba(99,102,241,0.25))]" />
           <div>
             <h1 className="font-bold text-slate-100 text-base tracking-tight flex items-center gap-1.5">
               DocuMind <span className="text-xs px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-mono font-medium">AI</span>
@@ -80,6 +89,31 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab, doc
 
       {/* System Status Footers */}
       <div className="p-4 border-t border-slate-800/80 bg-slate-950/40 space-y-2.5">
+        {/* Signed-in user */}
+        {user && (
+          <div className="flex items-center gap-3 pb-3 mb-1 border-b border-slate-800/60">
+            <div
+              className="w-9 h-9 shrink-0 rounded-full bg-indigo-500/15 border border-indigo-400/25 text-indigo-200 text-xs font-semibold flex items-center justify-center"
+              aria-hidden="true"
+            >
+              {initials}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-slate-100 truncate">{user.name}</p>
+              <p className="text-[11px] text-slate-500 truncate">{user.is_demo ? 'Demo account' : user.email}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => void logout()}
+              title="Sign out"
+              aria-label="Sign out"
+              className="p-2 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800/70 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         <div className="flex items-center justify-between text-xs text-slate-400">
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>

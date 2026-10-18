@@ -32,4 +32,9 @@ class Settings(BaseModel):
     port: int = 8000
     cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173", "*"]
 
+    # Authentication
+    allow_demo_login: bool = os.getenv("ALLOW_DEMO_LOGIN", "true").strip().lower() in ("1", "true", "yes", "on")
+    session_hours: int = 12      # session length when "Keep me signed in" is off
+    remember_days: int = 30      # session length when it is on
+
 settings = Settings()

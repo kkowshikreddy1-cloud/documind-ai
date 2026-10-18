@@ -7,41 +7,29 @@ export default {
   theme: {
     extend: {
       colors: {
-        parchment: {
-          50: '#fdfbf7',
-          100: '#f8f4ec',
-          200: '#f0e8d9',
-          300: '#e5d7c0',
-          400: '#d5c0a0',
-          500: '#be9f76',
-          600: '#a78458',
-          700: '#8c6b44',
-          800: '#715539',
-          900: '#5c4530',
-        },
-        vedic: {
-          saffron: '#d97706',
-          gold: '#d4af37',
-          goldLight: '#f59e0b',
-          crimson: '#991b1b',
-          terracotta: '#c2410c',
-          indigo: '#1e1b4b',
-          slate: '#0f172a',
-          teal: '#115e59',
-          amber: '#b45309',
-        }
+        // The report "paper" on the sign-in page
+        paper: '#eef1f8',
+        ink: '#131a33',
       },
       fontFamily: {
-        serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
-        display: ['"Cinzel"', 'Georgia', 'serif'],
-        sanskrit: ['"Noto Serif Devanagari"', '"Cormorant Garamond"', 'serif'],
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        paper: ['Newsreader', 'Georgia', 'serif'],
       },
-      boxShadow: {
-        'warm': '0 4px 20px -2px rgba(138, 92, 42, 0.12)',
-        'vedic': '0 10px 30px -4px rgba(180, 83, 9, 0.15)',
-        'subtle': '0 2px 10px 0 rgba(0, 0, 0, 0.05)',
-      }
+      keyframes: {
+        shake: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '20%, 60%': { transform: 'translateX(-6px)' },
+          '40%, 80%': { transform: 'translateX(6px)' },
+        },
+        'page-in': {
+          from: { opacity: '0', transform: 'translateY(8px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        shake: 'shake 0.4s ease-in-out',
+        'page-in': 'page-in 0.35s ease-out both',
+      },
     },
   },
   plugins: [],

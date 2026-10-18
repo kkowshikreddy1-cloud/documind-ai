@@ -122,6 +122,32 @@ def init_db():
     );
     """)
     
+    # User accounts
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        email TEXT NOT NULL UNIQUE,
+        name TEXT NOT NULL,
+        password_hash TEXT NOT NULL,
+        is_demo INTEGER DEFAULT 0,
+        created_at INTEGER NOT NULL,
+        last_login_at INTEGER
+    );
+    """)
+
+    # Sign-in sessions. Only a SHA-256 digest of each token is stored.
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS sessions (
+        token_hash TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        expires_at INTEGER NOT NULL,
+        remember INTEGER DEFAULT 0,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    );
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions (user_id)")
+
     conn.commit()
     conn.close()
 

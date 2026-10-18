@@ -75,8 +75,21 @@ npm run dev
 ```
 Open `http://localhost:5173` in your browser.
 
-### 3. Demo Walkthrough
-1. On the **Dashboard**, click **"Try Demo Report"**.
+### 3. Sign in
+The app opens on a sign-in page. Either:
+- choose **Create account** (name, email, and a password of 8+ characters), or
+- click **Explore with a demo account** to enter a shared workspace without signing up.
+
+How it works:
+- Passwords are hashed with scrypt. Sessions are random tokens, and only their SHA-256 digest is stored.
+- **Keep me signed in on this device** keeps you signed in for 30 days. Without it, you stay signed in for 12 hours or until you close the tab.
+- After 5 wrong passwords for the same email within 5 minutes, sign-in pauses for that email and the page shows a countdown.
+- Every `/api/...` data route requires sign-in. `/api/health` and `/api/auth/...` are open.
+- Accounts live in the local SQLite database (`backend/documind.db`). Documents and history are shared by everyone who signs in to the same server.
+- On a server other people can reach, set `ALLOW_DEMO_LOGIN=false` in `.env` to remove the demo button.
+
+### 4. Demo Walkthrough
+1. Sign in, then on the **Dashboard**, click **"Try Demo Report"**.
 2. Go to **AI Analyst** and click any of the 8 pre-loaded questions:
    - *"What was the production in Q4?"*
    - *"Which quarter had the highest efficiency?"*
@@ -97,5 +110,6 @@ Create a `.env` file in the root directory (optional, if using Gemini API):
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
 GEMINI_MODEL=gemini-2.5-flash
+ALLOW_DEMO_LOGIN=true
 ```
 *Note: If no API key is provided, DocuMind seamlessly uses its local deterministic multimodal reasoning engine.*

@@ -1,5 +1,5 @@
 $src = "C:\Users\KOWSHIK REDDY\OneDrive\Documents\BLOGGER"
-$dest = "C:\Users\KOWSHIK REDDY\OneDrive\Desktop\DharmaAI.zip"
+$dest = "C:\Users\KOWSHIK REDDY\OneDrive\Desktop\DocuMindAI.zip"
 
 if (Test-Path $dest) {
     Remove-Item $dest -Force

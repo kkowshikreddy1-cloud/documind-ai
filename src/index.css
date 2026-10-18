@@ -9,6 +9,35 @@
   }
 }
 
+/* Evidence highlight: a marker pen that sweeps across the cited text.
+   Used on the sign-in page demo and anywhere a source passage is shown. */
+.hl {
+  background-image: linear-gradient(rgba(255, 214, 10, 0.62), rgba(255, 214, 10, 0.62));
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  border-radius: 2px;
+  margin: 0 -0.14em;
+  padding: 0 0.14em;
+  transition: background-size 0.75s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+
+.hl[data-on='true'] {
+  background-size: 100% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

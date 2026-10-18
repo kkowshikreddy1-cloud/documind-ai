@@ -11,8 +11,11 @@ import { SettingsView } from './components/SettingsView';
 import { EvidenceDrawer } from './components/EvidenceDrawer';
 import { DocumentItem, EvidenceItem } from './types';
 import { fetchDocuments } from './services/api';
+import { AuthProvider, useAuth } from './auth/AuthContext';
+import { LoginPage } from './components/auth/LoginPage';
+import { LogoMark } from './components/Logo';
 
-export function App() {
+function Workspace() {
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [activeEvidence, setActiveEvidence] = useState<EvidenceItem | null>(null);
@@ -124,6 +127,32 @@ export function App() {
         onClose={() => setActiveEvidence(null)} 
       />
     </div>
+  );
+}
+
+/** Shown for a moment while a saved session is checked with the server. */
+function SessionCheck() {
+  return (
+    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-4" role="status">
+      <LogoMark className="w-12 h-12 animate-pulse" />
+      <p className="text-sm text-slate-400">Checking your session…</p>
+    </div>
+  );
+}
+
+/** Only signed-in users reach the workspace; everyone else sees the sign-in page. */
+function AuthGate() {
+  const { status } = useAuth();
+  if (status === 'checking') return <SessionCheck />;
+  if (status === 'anonymous') return <LoginPage />;
+  return <Workspace />;
+}
+
+export function App() {
+  return (
+    <AuthProvider>
+      <AuthGate />
+    </AuthProvider>
   );
 }
 

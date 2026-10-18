@@ -2,16 +2,21 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕉️</text></svg>" />
+    <!-- The ?v=2 suffix makes browsers drop the old cached icon. Bump it if you change the icon again. -->
+    <link rel="icon" href="/favicon.ico?v=2" sizes="48x48" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=2" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2" />
+    <meta name="theme-color" content="#020617" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DharmaAI — Citation-First Mahabharata Wisdom & Guidance</title>
-    <meta name="description" content="A trustworthy, citation-first AI guidance application reflecting on ethical, emotional, and personal life dilemmas using authentic Mahabharata verses, stories, and dialogues." />
+    <title>DocuMind AI</title>
+    <meta name="description" content="Understand. Prove. Decide. An AI analyst that answers questions about multimodal documents with every answer traced back to its evidence." />
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700&family=Noto+Serif+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
   </head>
-  <body class="bg-parchment-50 text-slate-900 selection:bg-vedic-gold/30 selection:text-slate-900 font-sans antialiased min-h-screen">
+  <body class="bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white font-sans antialiased min-h-screen">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
